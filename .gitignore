@@ -1,0 +1,26 @@
+#ignore everything
+*
+/*
+
+#except special files
+!.gitignore
+!.myfuncs
+!makefile
+!Dockerfile
+
+#except code files
+!*.c
+!*.sh
+!*.md
+!*.h
+!*.py
+!*.html
+!*.Dockerfile
+!*.yaml
+!*.conf
+!*.tf
+
+
+
+#except directorys
+!*/
