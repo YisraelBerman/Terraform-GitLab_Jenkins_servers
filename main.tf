@@ -28,13 +28,11 @@ module "gitlab_server" {
 }
 
 
-
 provider "gitlab" {
   token    = var.gitlab_token_value
   base_url = "http://${module.gitlab_server.public_ip}/api/v4"
 
 }
-
 
 
 resource "gitlab_project" "example" {
@@ -46,38 +44,35 @@ resource "gitlab_project" "example" {
 }
 
 
-
 resource "null_resource" "clone_repo" {
   
   provisioner "local-exec" {
-command = <<EOT
-      REPO_URL=$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||')
-      git clone http://root:${var.gitlab_token_value}@$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||') ${var.local_directory_path} 2>&1 | tee clone.log
-      touch ${var.local_directory_path}/Jenkinsfile
-      cat << 'EOF' > ${var.local_directory_path}/Jenkinsfile
-pipeline {
-    agent {
-        node {
-            label 'my-ssh-agent'
-        }
-    }
-    stages {
-        stage('Stage 1') {
-            steps {
-                echo 'Hello world!'
-            }
-        }
-    }
-}
-EOF
+  command = <<EOT
+        REPO_URL=$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||')
+        git clone http://root:${var.gitlab_token_value}@$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||') ${var.local_directory_path} 2>&1 | tee clone.log
+        touch ${var.local_directory_path}/Jenkinsfile
+        cat << 'EOF' > ${var.local_directory_path}/Jenkinsfile
+          pipeline {
+              agent {
+                  node {
+                      label 'my-ssh-agent'
+                  }
+              }
+              stages {
+                  stage('Stage 1') {
+                      steps {
+                          echo 'Hello world!'
+                      }
+                  }
+              }
+          }
+          EOF
 
     EOT  
   }
-triggers = {
-    always_run = "${timestamp()}"
-  } 
   depends_on = [gitlab_project.example]
 }
+
 
 module "jenkins_server" {
   source            = "./modules/jenkins_server"
@@ -128,6 +123,7 @@ resource "null_resource" "gitlab_jenkins" {
   depends_on = [gitlab_project.example]
 
 }
+
 
 resource "gitlab_project_hook" "gitlab_hook" {
   project               = gitlab_project.example.id
