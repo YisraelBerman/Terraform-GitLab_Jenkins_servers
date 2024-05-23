@@ -2,7 +2,7 @@ terraform {
   required_providers {
     gitlab = {
       source  = "gitlabhq/gitlab"
-      version = ">= 3.7.0"
+      version = ">= 17.0.0"
     }
   }
 }
@@ -22,7 +22,6 @@ module "gitlab_server" {
   gitlab_instance_type       = var.gitlab_instance_type
   key_pair_name              = var.key_pair_name
   gitlab_ami                 = var.gitlab_ami
-  gitlab_initial_root_password = var.gitlab_initial_root_password
   tags                       = var.tags
   gitlab_token_value         = var.gitlab_token_value
   vpc_cidr = var.vpc_cidr

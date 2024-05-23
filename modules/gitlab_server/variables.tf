@@ -57,11 +57,6 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-variable "gitlab_initial_root_password" {
-  description = "The initial root password for GitLab"
-  type        = string
-}
-
 
 variable "gitlab_token_value" {
   description = "The value for the GitLab personal access token."

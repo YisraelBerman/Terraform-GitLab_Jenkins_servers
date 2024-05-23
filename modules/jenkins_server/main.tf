@@ -46,24 +46,18 @@ resource "aws_security_group_rule" "egress_all" {
 }
 
 
-
-
-
-
-
 resource "aws_instance" "jenkins" {
   ami           = var.jenkins_ami
   instance_type = var.Jenkins_instance_type
   key_name      = var.key_pair_name
   subnet_id     = var.public_subnet_id
   associate_public_ip_address = true
-
-
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
 
   provisioner "local-exec" {
     command = "sed -i 's|agent_ip_here|${aws_instance.jenkins_agent.private_ip}|g' ${path.module}/jenkins_setup.sh"
   }
+  
   provisioner "file" {
     source      = "${var.key_pair_path}"
     destination = "/tmp/your_key.pem"  
@@ -73,7 +67,7 @@ resource "aws_instance" "jenkins" {
       private_key = file(var.key_pair_path)
       host        = self.public_ip
     }
-}
+  }
   provisioner "file" {
     source      = "${path.module}/jenkins_setup.sh"
     destination = "/tmp/jenkins_setup.sh"
@@ -86,8 +80,6 @@ resource "aws_instance" "jenkins" {
       host        = self.public_ip
     }
   }
-
-  
   
   provisioner "remote-exec" {
     inline = [
@@ -106,9 +98,6 @@ resource "aws_instance" "jenkins" {
     command = "scp -i ${var.key_pair_path} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${self.public_ip}:/home/ubuntu/jenkins_initial_admin_password.txt ./jenkins_initial_admin_password.txt"
   }
 
-
-
-
   provisioner "local-exec" {
     command = "sed -i 's|${aws_instance.jenkins_agent.private_ip}|agent_ip_here|g' ${path.module}/jenkins_setup.sh"
   }
@@ -116,17 +105,14 @@ resource "aws_instance" "jenkins" {
   tags = {
     Name = "JenkinsServer"
   }
-
-
 }
+
 
 resource "aws_instance" "jenkins_agent" {
   ami           = var.jenkins_agent_ami
   instance_type = var.agent_instance_type
   key_name      = var.key_pair_name
   subnet_id     = var.private_subnet_id
-
-
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
 
   user_data = <<-EOF

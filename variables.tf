@@ -2,7 +2,6 @@ variable "aws_region" {}
 variable "gitlab_instance_type" {}
 variable "key_pair_name" {}
 variable "gitlab_ami" {}
-variable "gitlab_initial_root_password" {}
 variable "tags" {
   type = map(string)
 }
