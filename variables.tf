@@ -25,8 +25,6 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-
-
 variable "gitlab_project_name" {
   description = "The name of the GitLab project."
   type        = string
@@ -51,7 +49,6 @@ variable "agent_instance_type" {
   description = "Instance type for Jenkins agent"
   type        = string
 }
-
 
 variable "local_directory_path" {
   description = "The local directory path where the repository will be cloned"

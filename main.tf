@@ -22,7 +22,7 @@ module "gitlab_server" {
   public_subnet_cidr = var.public_subnet_cidr
   private_subnet_cidr = var.private_subnet_cidr
   public_subnet_id    = module.vpc.public_subnets[0]
-  vpc_security_group_id = aws_security_group.gitlab_sg.id
+  vpc_id = module.vpc.vpc_id
 
 
 }
@@ -52,26 +52,27 @@ resource "null_resource" "clone_repo" {
         git clone http://root:${var.gitlab_token_value}@$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||') ${var.local_directory_path} 2>&1 | tee clone.log
         touch ${var.local_directory_path}/Jenkinsfile
         cat << 'EOF' > ${var.local_directory_path}/Jenkinsfile
-          pipeline {
-              agent {
-                  node {
-                      label 'my-ssh-agent'
-                  }
-              }
-              stages {
-                  stage('Stage 1') {
-                      steps {
-                          echo 'Hello world!'
-                      }
-                  }
-              }
-          }
-          EOF
+pipeline {
+    agent {
+        node {
+            label 'my-ssh-agent'
+        }
+    }
+    stages {
+        stage('Stage 1') {
+            steps {
+                echo 'Hello world!'
+            }
+        }
+    }
+}
+EOF
 
     EOT  
   }
   depends_on = [gitlab_project.example]
-}
+
+  }
 
 
 module "jenkins_server" {
@@ -85,6 +86,13 @@ module "jenkins_server" {
   public_subnet_id  = module.vpc.public_subnets[0]
   private_subnet_id = module.vpc.private_subnets[0]
   vpc_id            = module.vpc.vpc_id
+}
+
+
+resource "random_password" "Jenkins_token" {
+  length           = 32
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 
@@ -103,9 +111,10 @@ resource "null_resource" "gitlab_jenkins" {
   }
   provisioner "remote-exec" {
     inline = [
-      "export TOKEN=${var.gitlab_token_value}",
+      "export TOKEN=${module.gitlab_server.gitlab_token}",
       "export GITURL=${gitlab_project.example.http_url_to_repo}",
       "export PROJECTNAME=${var.gitlab_project_name}",
+      "export JENKINSTOKEN=${random_password.Jenkins_token.result}",
       "bash /tmp/gitlab_jenkins.sh"
     ]
 
@@ -115,13 +124,8 @@ resource "null_resource" "gitlab_jenkins" {
       private_key = file(module.gitlab_server.gitlab_key_pair_path)
       host        = module.jenkins_server.public_ip
     }
-    
-    
   }
-  
-  
   depends_on = [gitlab_project.example]
-
 }
 
 
@@ -130,9 +134,6 @@ resource "gitlab_project_hook" "gitlab_hook" {
   url                   = "http://${module.jenkins_server.public_ip}:8080/project/${var.gitlab_project_name}"
   merge_requests_events = true
   push_events = true
-  token = "bd559974d30d9b0c139ea446f7fbd5db"
-
-
-
+  token = random_password.Jenkins_token.result
 }
 

@@ -80,7 +80,7 @@ variable "public_subnet_id" {
   type        = string
 }
 
-variable "vpc_security_group_id" {
-  description = "ID of the VPC security group"
+variable "vpc_id" {
+  description = "ID of the VPC"
   type        = string
 }

@@ -55,31 +55,6 @@ while true; do
     fi
 done
 
-# Check if the token file exists and is valid
-START_TIME=$(date +%s)
-echo "Checking if the token file exists..."
-
-while [ ! -f "$TOKEN_FILE" ]; do
-    CURRENT_TIME=$(date +%s)
-    ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
-
-    if [ $ELAPSED_TIME -ge $MAX_WAIT_TIME ]; then
-        echo "Token file did not appear within $MAX_WAIT_TIME seconds. Exiting."
-        exit 1
-    fi
-
-    echo "Waiting for token file to appear..."
-    sleep $INTERVAL
-done
-
-# Once the file exists, check if the token is valid
-TOKEN=$(cat "$TOKEN_FILE")
-if [ -n "$TOKEN" ]; then
-    echo "Token created successfully."
-else
-    echo "Token file is empty. Something went wrong."
-    exit 1
-fi
 
 echo " "
 echo " "

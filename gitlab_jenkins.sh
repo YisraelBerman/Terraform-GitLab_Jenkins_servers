@@ -71,7 +71,7 @@ job_config_xml=$(cat <<EOF
           <excludeBranchesSpec></excludeBranchesSpec>
           <sourceBranchRegex></sourceBranchRegex>
           <targetBranchRegex></targetBranchRegex>
-                    <secretToken>bd559974d30d9b0c139ea446f7fbd5db</secretToken>
+                    <secretToken>$JENKINSTOKEN</secretToken>
           <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
         </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
       </triggers>
