@@ -5,7 +5,6 @@ variable "gitlab_ami" {}
 variable "tags" {
   type = map(string)
 }
-variable "gitlab_token_value" {}
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC"
   type        = string

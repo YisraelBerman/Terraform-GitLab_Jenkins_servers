@@ -79,13 +79,25 @@ resource "aws_instance" "gitlab_server" {
       "echo 'Creating GitLab access token script'",
       "echo \"user = User.find_by(username: 'root')\" > create_token.rb",
       "echo \"token = user.personal_access_tokens.create!(name: 'Automated Token', scopes: [:api, :read_user, :read_repository, :write_repository, :sudo], expires_at: 30.days.from_now)\" >> create_token.rb",
-      "echo \"token.set_token('${var.gitlab_token_value}')\" >> create_token.rb",
-      "echo \"token.save!\" >> create_token.rb",
       "echo \"File.open('/tmp/gitlab_token.txt', 'w') { |file| file.write(token.token) }\" >> create_token.rb",
       "sudo gitlab-rails runner -e production /home/ubuntu/create_token.rb"
     ]
   } 
+
+  provisioner "local-exec" {
+    command = "scp -i ${var.key_pair_path} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${self.public_ip}:/tmp/gitlab_token.txt ./gitlab_token.txt"
+  }
 }
+
+resource "null_resource" "read_gitlab_token" {
+  depends_on = [aws_instance.gitlab_server]
+
+  provisioner "local-exec" {
+    command = "cat ./gitlab_token.txt"
+  }
+}
+  
+
 
 
 resource "local_file" "private_key" {

@@ -23,7 +23,6 @@ module "gitlab_server" {
   key_pair_name              = var.key_pair_name
   gitlab_ami                 = var.gitlab_ami
   tags                       = var.tags
-  gitlab_token_value         = var.gitlab_token_value
   vpc_cidr = var.vpc_cidr
   public_subnet_cidr = var.public_subnet_cidr
   private_subnet_cidr = var.private_subnet_cidr
@@ -33,9 +32,12 @@ module "gitlab_server" {
 
 }
 
+data "local_file" "gitlab_token" {
+  filename = "./gitlab_token.txt"
+}
 
 provider "gitlab" {
-  token    = var.gitlab_token_value
+  token    = data.local_file.gitlab_token.content
   base_url = "http://${module.gitlab_server.public_ip}/api/v4"
 }
 
@@ -54,7 +56,7 @@ resource "null_resource" "clone_repo" {
   provisioner "local-exec" {
   command = <<EOT
         REPO_URL=$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||')
-        git clone http://root:${var.gitlab_token_value}@$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||') ${var.local_directory_path} 2>&1 | tee clone.log
+        git clone http://root:${data.local_file.gitlab_token.content}@$(echo "${gitlab_project.example.http_url_to_repo}" | sed -e 's|https://||' -e 's|http://||') ${var.local_directory_path} 2>&1 | tee clone.log
         touch ${var.local_directory_path}/Jenkinsfile
         cat << 'EOF' > ${var.local_directory_path}/Jenkinsfile
 pipeline {
@@ -116,7 +118,7 @@ resource "null_resource" "gitlab_jenkins" {
   }
   provisioner "remote-exec" {
     inline = [
-      "export TOKEN=${var.gitlab_token_value}",
+      "export TOKEN=${data.local_file.gitlab_token.content}",
       "export GITURL=${gitlab_project.example.http_url_to_repo}",
       "export PROJECTNAME=${var.gitlab_project_name}",
       "export JENKINSTOKEN='${random_password.Jenkins_token.result}'",

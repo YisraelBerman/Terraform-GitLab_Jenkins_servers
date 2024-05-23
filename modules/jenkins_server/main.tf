@@ -84,7 +84,7 @@ resource "aws_instance" "jenkins" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/jenkins_setup.sh",
-      "/tmp/jenkins_setup.sh"
+      "/tmp/jenkins_setup.sh > /dev/null 2>&1"
     ]
     connection {
       type        = "ssh"

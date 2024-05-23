@@ -58,13 +58,6 @@ variable "private_subnet_cidr" {
 }
 
 
-variable "gitlab_token_value" {
-  description = "The value for the GitLab personal access token."
-  type        = string
-  default = "my_secure_token_here"
-}
-
-
 variable "gitlab_project_name" {
   description = "The name of the GitLab project."
   type        = string
