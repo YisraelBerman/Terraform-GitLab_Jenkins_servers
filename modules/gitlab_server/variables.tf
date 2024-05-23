@@ -66,6 +66,7 @@ variable "gitlab_initial_root_password" {
 variable "gitlab_token_value" {
   description = "The value for the GitLab personal access token."
   type        = string
+  default = "my_secure_token_here"
 }
 
 

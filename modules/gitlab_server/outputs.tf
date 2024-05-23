@@ -21,7 +21,5 @@ output "gitlab_key_pair_public_key" {
   value = aws_key_pair.gitlab_key_pair.public_key
 }
 
-output "gitlab_token" {
-  value = random_password.GitLab_token.result
-}
+
 

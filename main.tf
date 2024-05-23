@@ -8,6 +8,13 @@ terraform {
 }
 
 
+resource "random_password" "GitLab_token" {
+  length           = 16
+  special          = false
+  
+}
+
+
 module "gitlab_server" {
   source = "./modules/gitlab_server"
   gitlab_project_name =  var.gitlab_project_name
@@ -31,7 +38,6 @@ module "gitlab_server" {
 provider "gitlab" {
   token    = var.gitlab_token_value
   base_url = "http://${module.gitlab_server.public_ip}/api/v4"
-
 }
 
 
@@ -71,7 +77,7 @@ EOF
     EOT  
   }
   depends_on = [gitlab_project.example]
-
+  
   }
 
 
@@ -111,10 +117,10 @@ resource "null_resource" "gitlab_jenkins" {
   }
   provisioner "remote-exec" {
     inline = [
-      "export TOKEN=${module.gitlab_server.gitlab_token}",
+      "export TOKEN=${var.gitlab_token_value}",
       "export GITURL=${gitlab_project.example.http_url_to_repo}",
       "export PROJECTNAME=${var.gitlab_project_name}",
-      "export JENKINSTOKEN=${random_password.Jenkins_token.result}",
+      "export JENKINSTOKEN='${random_password.Jenkins_token.result}'",
       "bash /tmp/gitlab_jenkins.sh"
     ]
 
@@ -134,6 +140,6 @@ resource "gitlab_project_hook" "gitlab_hook" {
   url                   = "http://${module.jenkins_server.public_ip}:8080/project/${var.gitlab_project_name}"
   merge_requests_events = true
   push_events = true
-  token = random_password.Jenkins_token.result
+  token = tostring(random_password.Jenkins_token.result)
 }
 
