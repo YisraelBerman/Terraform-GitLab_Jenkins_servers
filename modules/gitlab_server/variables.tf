@@ -1,9 +1,3 @@
-variable "aws_region" {
-  description = "The AWS region to deploy the resources"
-  type        = string
-  default     = "us-east-1"
-}
-
 variable "gitlab_instance_type" {
   description = "The type of instance to use for the GitLab server"
   type        = string
@@ -23,21 +17,12 @@ variable "key_pair_path" {
 }
 
 
-
 variable "gitlab_ami" {
   description = "The AMI ID for the GitLab server"
   type        = string
   default     = "ami-0b9714e2ab1e3780e"  
 }
 
-variable "tags" {
-  description = "Tags to be applied to all resources"
-  type        = map(string)
-  default     = {
-    Name        = "GitLabServer"
-    Environment = "Production"
-  }
-}
 
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC"

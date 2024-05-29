@@ -17,12 +17,10 @@ resource "random_password" "GitLab_token" {
 
 module "gitlab_server" {
   source = "./modules/gitlab_server"
-  gitlab_project_name =  var.gitlab_project_name
-  aws_region                 = var.aws_region
+  gitlab_project_name =  var.project_name
   gitlab_instance_type       = var.gitlab_instance_type
   key_pair_name              = var.key_pair_name
   gitlab_ami                 = var.gitlab_ami
-  tags                       = var.tags
   vpc_cidr = var.vpc_cidr
   public_subnet_cidr = var.public_subnet_cidr
   private_subnet_cidr = var.private_subnet_cidr
@@ -43,7 +41,7 @@ provider "gitlab" {
 
 
 resource "gitlab_project" "example" {
-  name        = var.gitlab_project_name
+  name        = var.project_name
   description = "An example project created with Terraform"
   visibility_level = "private"
 
@@ -84,8 +82,8 @@ EOF
 
 module "jenkins_server" {
   source            = "./modules/jenkins_server"
-  aws_region        = var.aws_region
   key_pair_name     = module.gitlab_server.gitlab_key_pair_name
+  key_pair_path = module.gitlab_server.gitlab_key_pair_path
   jenkins_ami       = var.jenkins_ami
   Jenkins_instance_type = var.Jenkins_instance_type
   jenkins_agent_ami         = var.jenkins_agent_ami
@@ -99,7 +97,7 @@ module "jenkins_server" {
 resource "random_password" "Jenkins_token" {
   length           = 32
   special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!#$%*()-_=+[]{}<>:?"
 }
 
 
@@ -120,25 +118,26 @@ resource "null_resource" "gitlab_jenkins" {
     inline = [
       "export TOKEN=${data.local_file.gitlab_token.content}",
       "export GITURL=${gitlab_project.example.http_url_to_repo}",
-      "export PROJECTNAME=${var.gitlab_project_name}",
+      "export PROJECTNAME=${var.project_name}",
       "export JENKINSTOKEN='${random_password.Jenkins_token.result}'",
+      "sudo chmod +x /tmp/gitlab_jenkins.sh",
       "bash /tmp/gitlab_jenkins.sh"
     ]
 
-  connection {
+    connection {
       type        = "ssh"
       user        = "ubuntu"
       private_key = file(module.gitlab_server.gitlab_key_pair_path)
       host        = module.jenkins_server.public_ip
     }
   }
-  depends_on = [gitlab_project.example]
+  depends_on = [ gitlab_project.example, module.jenkins_server ]
 }
 
 
 resource "gitlab_project_hook" "gitlab_hook" {
   project               = gitlab_project.example.id
-  url                   = "http://${module.jenkins_server.public_ip}:8080/project/${var.gitlab_project_name}"
+  url                   = "http://${module.jenkins_server.public_ip}:8080/project/${var.project_name}"
   merge_requests_events = true
   push_events = true
   token = tostring(random_password.Jenkins_token.result)

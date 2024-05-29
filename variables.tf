@@ -2,9 +2,7 @@ variable "aws_region" {}
 variable "gitlab_instance_type" {}
 variable "key_pair_name" {}
 variable "gitlab_ami" {}
-variable "tags" {
-  type = map(string)
-}
+
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC"
   type        = string
@@ -23,8 +21,8 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
-variable "gitlab_project_name" {
-  description = "The name of the GitLab project."
+variable "project_name" {
+  description = "The name of the project."
   type        = string
 }
 

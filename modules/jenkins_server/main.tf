@@ -1,8 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
-
 resource "aws_security_group" "jenkins_sg" {
   name        = "jenkins_sg"
   description = "Allow SSH and HTTP access"

@@ -1,19 +1,12 @@
-variable "aws_region" {
-  description = "The AWS region to deploy the resources"
-  type        = string
-  default     = "us-east-1"
-}
 
 variable "key_pair_name" {
   description = "The name of the SSH key pair"
   type        = string
-  default     = "my-key-pair"
 }
 
 variable "key_pair_path" {
   description = "The local path where the key pair will be saved"
   type        = string
-  default     = "./my-key-pair.pem"
 }
 
 variable "Jenkins_instance_type" {

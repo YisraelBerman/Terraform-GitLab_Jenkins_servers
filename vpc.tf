@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.8.1"
 
-  name = "${var.gitlab_project_name}-vpc"
+  name = "${var.project_name}-vpc"
   cidr = var.vpc_cidr
 
   azs             = ["${var.aws_region}a", "${var.aws_region}b"]
@@ -13,15 +13,15 @@ module "vpc" {
   single_nat_gateway = true
 
   public_subnet_tags = {
-    Name = "${var.gitlab_project_name}-public-subnet"
+    Name = "${var.project_name}-public-subnet"
   }
 
   private_subnet_tags = {
-    Name = "${var.gitlab_project_name}-private-subnet"
+    Name = "${var.project_name}-private-subnet"
   }
 
   tags = {
-    Name = "${var.gitlab_project_name}-vpc"
+    Name = "${var.project_name}-vpc"
   }
 }
 
